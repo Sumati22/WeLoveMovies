@@ -1,5 +1,6 @@
 require("dotenv").config();
 const path = require("path");
+
 const knex = require("knex");
 
 const db = knex({
@@ -15,14 +16,10 @@ const db = knex({
 
 async function resetAndSetup() {
   try {
-    console.log("🧹 Dropping existing tables...");
-
-    // drop in correct order to handle foreign key constraints
-    await db.schema.hasTable("movies_theaters").then((exists) => exists && db.schema.dropTable("movies_theaters"));
-    await db.schema.hasTable("reviews").then((exists) => exists && db.schema.dropTable("reviews"));
-    await db.schema.hasTable("critics").then((exists) => exists && db.schema.dropTable("critics"));
-    await db.schema.hasTable("theaters").then((exists) => exists && db.schema.dropTable("theaters"));
-    await db.schema.hasTable("movies").then((exists) => exists && db.schema.dropTable("movies"));
+    console.log("🧹 Dropping and recreating public schema...");
+    await db.raw("DROP SCHEMA public CASCADE;");
+    await db.raw("CREATE SCHEMA public;");
+    await db.raw("SET search_path TO public;"); // 👈 This line is the magic
 
     console.log("📦 Running migrations...");
     await db.migrate.latest();
