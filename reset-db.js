@@ -1,9 +1,17 @@
 require("dotenv").config();
+const path = require("path");
+
 const knex = require("knex");
 
 const db = knex({
   client: "pg",
   connection: process.env.DATABASE_URL,
+  migrations: {
+    directory: path.join(__dirname, "src", "db", "migrations"),
+  },
+  seeds: {
+    directory: path.join(__dirname, "src", "db", "seeds"),
+  },
 });
 
 async function resetAndSetup() {
